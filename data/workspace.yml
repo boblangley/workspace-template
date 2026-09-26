@@ -10,7 +10,6 @@ folders:
   - agents/pi
   - agents/t3
   - workflows/state
-  - workspace
   - worktrees
 
 # Repositories cloned at the workspace branch, or created as an orphan branch.

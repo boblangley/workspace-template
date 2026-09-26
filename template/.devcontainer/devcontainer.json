@@ -55,7 +55,7 @@
         }
     },
 
-    "workspaceMount": "source=${localWorkspaceFolder}/{{ slug }},target=/workspaces/{{ slug }},type=bind,consistency=cached",
+    "workspaceMount": "source=${localWorkspaceFolder}/workspace,target=/workspaces/{{ slug }},type=bind,consistency=cached",
     "workspaceFolder": "/workspaces/{{ slug }}",
 
     "mounts": [
@@ -126,6 +126,11 @@
             "target": "/home/vscode/.local/share/dagu",
             "type": "bind"
         },
+        {   // Devcontainer configuration
+            "source": "${localWorkspaceFolder}/.devcontainer",
+            "target": "/workspaces/.devcontainer",
+            "type": "bind"
+        },
         {   // Forks the workspace is maintaining or contributing to as part of the workspaces
             "source": "${localWorkspaceFolder}/forks",
             "target": "/workspaces/forks",
@@ -189,6 +194,11 @@
         {   // VS Code workspace file
             "source": "${localWorkspaceFolder}/{{ slug }}.code-workspace",
             "target": "/workspaces/{{ slug }}.code-workspace",
+            "type": "bind"
+        },
+        {   // Git worktrees for the workspace
+            "source": "${localWorkspaceFolder}/worktrees",
+            "target": "/workspaces/worktrees",
             "type": "bind"
         },
         {   // Wyrwood ssh-agent socket
