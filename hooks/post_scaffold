@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Clone <branch> from <remote-url> into <destination>, or create it as an
+# orphan branch (with an empty initial commit) and push it if it doesn't exist.
+clone_or_create() {
+    local usage="Usage: ${FUNCNAME[0]} <remote-url> <branch> <destination>"
+    local remote_url=${1:?$usage}
+    local branch=${2:?$usage}
+    local destination=${3:?$usage}
+
+    if ! git check-ref-format --branch "$branch" >/dev/null; then
+        echo "Error: invalid branch name: $branch" >&2
+        return 1
+    fi
+
+    if [[ -e "$destination" ]]; then
+        echo "Error: destination already exists: $destination" >&2
+        return 1
+    fi
+
+    if git ls-remote --exit-code --heads \
+        "$remote_url" "refs/heads/$branch" >/dev/null 2>&1
+    then
+        echo "Remote branch '$branch' exists; cloning it."
+        git clone --branch "$branch" --single-branch \
+            "$remote_url" "$destination"
+    else
+        echo "Remote branch '$branch' does not exist; creating an orphan branch."
+
+        git clone --no-checkout "$remote_url" "$destination"
+
+        (
+            cd "$destination" &&
+            git switch --orphan "$branch" &&
+            git commit --allow-empty -m "Initialize orphan branch" &&
+            git push --set-upstream origin "$branch"
+        )
+    fi
+}
+
+clone_or_create git@github.com:boblangley/kanban.git          "{{ .ProjectKebab }}" kanban
+clone_or_create git@github.com:boblangley/mnemonic-vault.git  "{{ .ProjectKebab }}" memory
+clone_or_create git@github.com:boblangley/workflows.git       "{{ .ProjectKebab }}" workflows/local

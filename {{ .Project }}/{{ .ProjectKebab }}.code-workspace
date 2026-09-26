@@ -1,0 +1,47 @@
+{
+	"folders": [
+		{
+			"name": "{{ .Project }}",
+			"path": "{{ .ProjectKebab }}"
+		},
+		{
+			"name": "Worktrees",
+			"path": "worktrees"
+		},
+		{
+			"name": "Forks",
+			"path": "forks"
+		},
+		{
+			"name": "KANBAN",
+			"path": "kanban"
+		},
+		{
+			"name": "Local Memory",
+			"path": "../memory"
+		},
+		{
+			"name": "References",
+			"path": "references"
+		},
+		{
+			"name": "Docker mounts",
+			"path": "mnt"
+		},
+		{
+			"name": "Lore",
+			"path": "lore"
+		},
+		{
+			"name": "Workflows",
+			"path": "workflows"
+		},
+		{
+			"name": "Devcontainer",
+			"path": ".devcontainer"
+		}
+	],
+	"settings": {
+		"window.title": "{{ .Project }}"
+	}
+}

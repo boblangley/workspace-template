@@ -1,0 +1,260 @@
+{
+    "name": "{{ .Project | toUpper }}",
+    "image": "ghcr.io/wyrd-company/devcontainers/base:resolute",
+
+    "features": {
+        "ghcr.io/wyrd-company/devcontainers/caddy:1": {
+            "acmeCa": "https://caddy/acme/local/directory",
+            "acmeCaRoot": "/usr/local/share/ca-certificates/caddy-root.crt"
+        },
+        "ghcr.io/wyrd-company/devcontainers/claude-code-cli:1": {},
+        "ghcr.io/wyrd-company/devcontainers/codex-cli:1": {},
+        "ghcr.io/wyrd-company/devcontainers/cursor-agent-cli:1": {},
+        "ghcr.io/wyrd-company/devcontainers/dagu:latest": {
+            "dnsName": "workflows.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+        },
+        {{ if (eq .Scaffold.docker "docker-in-docker") }}"ghcr.io/wyrd-company/devcontainers/docker-in-docker:1": {},{{ end }}
+        {{ if (eq .Scaffold.docker "docker-out-of-docker") }}"ghcr.io/wyrd-company/devcontainers/docker-outside-of-docker:1": {},{{ end }}
+        {{ if (.Scaffold.sdks | has "dotnet") }}"ghcr.io/devcontainers/features/dotnet:2": {},{{ end }}
+        "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
+        {{ if (.Scaffold.sdks | has "flutter") }}"ghcr.io/wyrd-company/the-wyrding-way-design-system/flutter:1": {},{{ end }}
+        {{ if (.Scaffold.sdks | has "go") }}"ghcr.io/wyrd-company/devcontainers/go:1": {},{{ end }}
+        "ghcr.io/wyrd-company/heddle/heddle:1": {
+            "dnsName": "heddle.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+        },
+        "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2": {},
+        "ghcr.io/devcontainers/features/node:2": {},
+        "ghcr.io/wyrd-company/devcontainers/openbao-agent:1": {},
+        "ghcr.io/wyrd-company/devcontainers/opencodex:2": {}
+        "ghcr.io/wyrd-company/devcontainers/opentelemetry-collector:1": {
+            "distribution": "contrib"
+        }
+        "ghcr.io/wyrd-company/devcontainers/pi-coding-agent:1": {},
+        "ghcr.io/devcontainers/features/python:1": {},
+        {{ if (.Scaffold.sdks | has "rust") }}"ghcr.io/devcontainers/features/rust:1": {},{{ end }}
+        "ghcr.io/wyrd-company/devcontainers/sshd:1": {},        
+        "ghcr.io/wyrd-company/devcontainers/t3code-server:latest": {
+            "packageSource": "github:wyrd-company/t3code",
+            "dnsName": "t3.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+        }
+    },
+
+    "workspaceMount": "source=${localWorkspaceFolder}/{{ .ProjectKebab }},target=/workspaces/{{ .ProjectKebab }},type=bind,consistency=cached",
+    "workspaceFolder": "/workspaces/{{ .ProjectKebab }}",
+
+    "mounts": [
+        {   // AGENTS.md
+            "source": "${localWorkspaceFolder}/AGENTS.md",
+            "target": "/workspaces/AGENTS.md",
+            "type": "bind"
+        },
+        {   // AGENTS.md as WORKSPACE.mdc
+            "source": "${localWorkspaceFolder}/AGENTS.md",
+            "target": "/home/vscode/.cursor/rules/WORKSPACE.mdc",
+            "type": "bind"
+        },
+        {   // Archived work related to the workspace
+            "source": "${localWorkspaceFolder}/archive",
+            "target": "/workspaces/archive",
+            "type": "bind"
+        },
+        {   // CA certificates to trust
+            "source": "${localEnv:HOME}/.workspaces/ca-certificates",
+            "target": "/usr/local/share/ca-certificates,readonly",
+            "type": "bind"
+        },
+        {   // chezmoi config
+            "source": "${localEnv:HOME}/.workspaces/chezmoi.yml",
+            "target": "/home/vscode/.config/chezmoi/chezmoi.yaml",
+            "type": "bind"
+        },
+        {   // Claude source
+            "source": "${localWorkspaceFolder}/agents/claude",
+            "target": "/home/vscode/.claude",
+            "type": "bind"
+        },
+        {   // Codex source
+            "source": "${localWorkspaceFolder}/agents/codex",
+            "target": "/home/vscode/.codex",
+            "type": "bind"
+        },
+        {   // Cursor common
+            "source": "${localEnv:HOME}/.workspaces/cursor/config",
+            "target": "/home/vscode/.config/cursor",
+            "type": "bind"
+        },
+        {   // Cursor workspace user profile
+            "source": "${localWorkspaceFolder}/agents/cursor",
+            "target": "/home/vscode/.cursor",
+            "type": "bind"
+        },
+        {{- if .Scaffold.docker }}        {   // Docker workspaces mnt folder - shared by host so docker bind mounts work
+            "source": "/workspaces/mnt/{{ .ProjectKebab }}",
+            "target": "/workspaces/mnt/{{ .ProjectKebab }}",
+            "type": "bind"
+        },{{ end }}
+        {
+            "source": "${localEnv:HOME}/.workspaces/dagu",
+            "target": "/home/vscode/.config/dagu",
+            "type": "bind"
+        },
+        {   // Dagu DAGs, Wiki, and the shared submodule
+            "source": "${localWorkspaceFolder}/workflows/local",
+            "target": "/workspaces/workflows",
+            "type": "bind"
+        },
+        {   // Dagu state
+            "source": "${localWorkspaceFolder}/workflows/state",
+            "target": "/home/vscode/.local/share/dagu",
+            "type": "bind"
+        },
+        {   // Forks the workspace is maintaining or contributing to as part of the workspaces
+            "source": "${localWorkspaceFolder}/forks",
+            "target": "/workspaces/forks",
+            "type": "bind"
+        },
+        {   // Heddle config
+            "source": "${localWorkspaceFolder}/agents/heddle/config",
+            "target": "/home/vscode/.heddle",
+            "type": "bind"
+        },
+        {   // Heddle state
+            "source": "${localWorkspaceFolder}/agents/heddle/state",
+            "target": "/var/lib/heddle",
+            "type": "bind"
+        },
+        {   // Homebrew brewfile
+            "source": "${localEnv:HOME}/.workspaces/.Brewfile",
+            "target": "/home/vscode/.Brewfile,readonly",
+            "type": "bind"
+        },
+        {   // Homebrew config
+            "source": "${localEnv:HOME}/.workspaces/homebrew",
+            "target": "/home/vscode/.homebrew",
+            "type": "bind"
+        },
+        {   // kanban-md KANBAN board
+            "source": "${localWorkspaceFolder}/kanban",
+            "target": "/workspaces/kanban",
+            "type": "bind"
+        },
+        {   // Lore
+            "source": "${localWorkspaceFolder}/agents/lore",
+            "target": "/workspaces/lore",
+            "type": "bind"
+        },
+        {   // mnemonic workspace vault
+            "source": "${localWorkspaceFolder}/agents/memory",
+            "target": "/workspaces/memory",
+            "type": "bind"
+        },
+        {   // mnemonic user vault
+            "source": "${localEnv:$HOME}/mnemonic-vault",
+            "target": "/home/vscode/mnemonic-vault",
+            "type": "bind"
+        },
+        {   // opencodex profile
+            "source": "${localWorkspaceFolder}/agents/opencodex",
+            "target": "/home/vscode/.opencodex",
+            "type": "bind"
+        },
+        {   // Reference material, e.g. shallow cloned repositories or other files
+            "source": "${localWorkspaceFolder}/references",
+            "target": "/workspaces/references",
+            "type": "bind"
+        },
+        {   // T3Code server home
+            "source": "${localWorkspaceFolder}/agents/t3",
+            "target": "/home/vscode/.t3/userdata",
+            "type": "bind"
+        },
+        {   // VS Code workspace file
+            "source": "${localWorkspaceFolder}/{{ .ProjectKebab }}.code-workspace",
+            "target": "/workspaces/{{ .ProjectKebab }}.code-workspace",
+            "type": "bind"
+        },
+        {   // Wyrwood ssh-agent socket
+            "source": "${localEnv:HOME}/.workspaces/wyrwood",
+            "target": "/home/vscode/.ssh-agent.sock",
+            "type": "bind"
+        }
+  ],
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                {{- if .Scaffold.docker }}                // Docker and containers
+                "ms-azuretools.vscode-docker",{{ end }}
+                {{- if .Scaffold.sdks | has "go" }}                // Go
+                "golang.Go",{{ end }}
+                {{- if (.Scaffold.sdks | has "node" or .Scaffold.sdks | has "bun") }}                // Typescript
+                "ms-vscode.vscode-typescript-next",{{ end }}
+
+                // AI Assistants
+                "anthropic.claude-code",              // Claude
+                "openai.chatgpt",                     // Codex
+
+                // Productivity
+                "Gruntfuggly.todo-tree",              // Shows local TODO
+                "bierner.github-markdown-preview",    // GitHub styled markdown
+                "redhat.vscode-yaml",                 // YAML support
+                "MermaidChart.vscode-mermaid-chart",  // Mermaid chart rendering
+
+                // Tooling
+                "task.vscode-task"
+            ],
+            "settings": {
+                "window.title": "{{ .Project | toUpper }}"
+                "terminal.integrated.shell.linux": "/bin/fish",
+                "markdown.preview.theme": "github",
+                "claudeCode": {
+                    "claudeProcessWrapper": "/home/vscode/.claude/cc"
+                },
+                "explorer.fileNesting.enabled": true,
+                "explorer.fileNesting.patterns": {
+                    "*": "${basename}.*.${extname}, ${basename}.*.${extname}.j2, ${basename}.*.${extname}.jinja"
+                },
+                "git.ignoredRepositories": [
+                    "/workspaces/archive",
+                    "/workspaces/references"
+                ],
+                "rumdl.server.path": "/home/linuxbrew/.linuxbrew/bin/rumdl",
+                "ryl.path": "/home/vscode/.local/bin/ryl",
+                "[yaml]": {
+                    "editor.defaultFormatter": "owenlamont.ryl",
+                    "editor.formatOnSave": true,
+                    "editor.codeActionsOnSave": {
+                    "source.fixAll.ryl": "explicit"
+                    }
+                },
+                "todo-tree.ripgrep.ripgrep": "/home/linuxbrew/.linuxbrew/bin/rg",
+                "remote.SSH.enableAgentForwarding": {{ .Scaffold.enable_agent_forwarding }}
+            }
+        }
+    },
+
+    "containerEnv": {
+        "DEVCONTAINER_ID": "${devcontainerId}",
+        "HOST_HOSTNAME": "${localEnv:HOSTNAME}",
+        "NODE_EXTRA_CA_CERTS": "/usr/local/share/ca-certificates/",
+        "NPM_CONFIG_PREFIX": "/home/vscode/.npm-global",
+        "PNPM_HOME": "/home/vscode/.npm-global/bin",
+        "PROJECT": "{{ .Project }}",
+        "SSH_AUTH_SOCK": "/home/vscode/.ssh-agent.sock",
+        "WORKSPACE_HOME": "${containerWorkspaceFolder}",
+    },
+
+    "remoteEnv": {
+        "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+    },
+  
+    "shutdownAction": "none",
+    "overrideCommand": false,
+
+    "runArgs": [
+        "--network=devcontainers",
+        "-l", "devcontainer.id=${devcontainerId}",
+        "-h", "{{ .ProjectKebab }}",
+        "--name", "{{ .ProjectKebab }}"
+    ]
+}

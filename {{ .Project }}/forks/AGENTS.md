@@ -1,0 +1,1 @@
+<forks-folder>Forked repos should be considered production code. Always follow the local conventions, CONTRIBUTING.md, etc.</forks-folder>

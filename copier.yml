@@ -1,0 +1,84 @@
+_subdirectory: template
+_external_data:
+  workspace: ../external_data.yml
+
+_preserve_symlinks: true
+
+_exclude:
+  - "**/.gitkeep"
+
+_skip_if_exists:
+  - AGENTS.md  
+
+_tasks:
+  # Clone workspace kanban branch
+  - command: ./build-or-create.sh {{_external_data.workspace.repos.kanban}}  {{ .ProjectKebab }} {{_copier_conf.dst_path }}/kanban
+    working_directory: "{{_copier_conf.src_path }}/scripts"
+
+  # Clone workspace mnemonic-vault branch
+  - command: ./build-or-create.sh {{_external_data.workspace.repos.mnemonic-vault}} {{ .ProjectKebab }} {{_copier_conf.dst_path }}/memory
+    working_directory: "{{_copier_conf.src_path }}/scripts"
+  
+  # Clone workspace workflows branch
+  - command: ./build-or-create.sh {{_external_data.workspace.repos.workflows}} {{ .ProjectKebab }} {{_copier_conf.dst_path }}/workflows/local
+    working_directory: "{{_copier_conf.src_path }}/scripts"
+
+  # 
+  - command: 
+    working_directory: "{{_copier_conf.src_path }}/scripts"
+
+ .ProjectKebab :
+  type: string
+  help: What is the slug you want to use to identify your workspace?
+  placeholder: my-project
+  default:
+
+ .Project :
+  type: string
+  help: What name should the workspace use?
+  placeholder: My Project
+  default: {{ .ProjectKebab |capitalize}}
+
+domain_name:
+  type: string
+  help: What host domain name to reach the container?
+  default:
+
+sdks:
+  type: yaml
+  help: What SDKs does the workspace need?
+  multiselect: true
+  default: []
+  choices:
+    Bun:
+      value: sdk-bun
+    DotNet:
+      value: sdk-dotnet
+    Flutter:
+      value: sdk-flutter
+    Go:
+      value: sdk-go
+    Node:
+      value: sdk-node
+    Python:
+      value: sdk-python
+    Rust:
+      value: sdk-rust
+
+
+needs_docker:
+  type: yaml
+  help: Does the workspace need Docker?
+  multiselect: true
+  default: [docker-nope]
+  choices:
+    Nope:
+      value: docker-nope
+    Docker-in-Docker:
+      value: docker-did
+    Docker-out-of-Docker:
+      value: docker-dood
+
+
+_message_after_copy: |
+  Your workspace {{workspace-slug}} has been created successfully!

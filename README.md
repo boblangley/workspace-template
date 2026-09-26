@@ -1,2 +1,3 @@
 # workspace-template
-Copier template for my personal workspaces
+Scaffold template for my personal workspaces
+
