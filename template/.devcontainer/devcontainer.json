@@ -262,7 +262,7 @@
                     }
                 },
                 "todo-tree.ripgrep.ripgrep": "/home/linuxbrew/.linuxbrew/bin/rg",
-                "remote.SSH.enableAgentForwarding": {{ 'true' if enable_agent_forwarding else 'false' }}
+                "remote.SSH.enableAgentForwarding": {{ enable_agent_forwarding | tojson }}
             }
         }
     },
