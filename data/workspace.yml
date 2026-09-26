@@ -14,12 +14,9 @@ folders:
 
 # Repositories cloned at the workspace branch, or created as an orphan branch.
 repos:
-  kanban:
-    url: git@github.com:boblangley/kanban.git
+  - url: git@github.com:boblangley/kanban.git
     path: kanban
-  memory:
-    url: git@github.com:boblangley/mnemonic-vault.git
+  - url: git@github.com:boblangley/mnemonic-vault.git
     path: agents/memory
-  workflows:
-    url: git@github.com:boblangley/workflows.git
+  - url: git@github.com:boblangley/workflows.git
     path: workflows/local

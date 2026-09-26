@@ -56,12 +56,9 @@ files:
     path: "{{ folder }}/.gitkeep"
 
 hooks:
-  - script: hooks/clone-or-create
-    args: [ "{{ repos.kanban.url }}", "{{ slug }}", "{{ repos.kanban.path }}" ]
-  - script: hooks/clone-or-create
-    args: [ "{{ repos.memory.url }}", "{{ slug }}", "{{ repos.memory.path }}" ]
-  - script: hooks/clone-or-create
-    args: [ "{{ repos.workflows.url }}", "{{ slug }}", "{{ repos.workflows.path }}" ]
+  - each: repos as repo
+    script: hooks/clone-or-create
+    args: [ "{{ repo.url }}", "{{ slug }}", "{{ repo.path }}" ]
 
 messages:
   before-apply: |
