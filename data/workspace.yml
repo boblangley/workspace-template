@@ -1,0 +1,26 @@
+# Folders created empty, relative to the workspace root.
+folders:
+  - agents/claude
+  - agents/codex
+  - agents/cursor
+  - agents/heddle/config
+  - agents/heddle/state
+  - agents/lore
+  - agents/opencodex
+  - agents/pi
+  - agents/t3
+  - workflows/state
+  - workspace
+  - worktrees
+
+# Repositories cloned at the workspace branch, or created as an orphan branch.
+repos:
+  kanban:
+    url: git@github.com:boblangley/kanban.git
+    path: kanban
+  memory:
+    url: git@github.com:boblangley/mnemonic-vault.git
+    path: agents/memory
+  workflows:
+    url: git@github.com:boblangley/workflows.git
+    path: workflows/local

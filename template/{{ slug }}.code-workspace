@@ -1,8 +1,8 @@
 {
 	"folders": [
 		{
-			"name": "{{ .Project }}",
-			"path": "{{ .ProjectKebab }}"
+			"name": "{{ name }}",
+			"path": "{{ slug }}"
 		},
 		{
 			"name": "Worktrees",
@@ -18,16 +18,18 @@
 		},
 		{
 			"name": "Local Memory",
-			"path": "../memory"
+			"path": "memory"
 		},
 		{
 			"name": "References",
 			"path": "references"
 		},
+		{%- if uses_docker %}
 		{
 			"name": "Docker mounts",
 			"path": "mnt"
 		},
+		{%- endif %}
 		{
 			"name": "Lore",
 			"path": "lore"
@@ -42,6 +44,6 @@
 		}
 	],
 	"settings": {
-		"window.title": "{{ .Project }}"
+		"window.title": "{{ name }}"
 	}
 }

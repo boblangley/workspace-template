@@ -1,5 +1,5 @@
 {
-    "name": "{{ .Project | toUpper }}",
+    "name": "{{ name | upper }}",
     "image": "ghcr.io/wyrd-company/devcontainers/base:resolute",
 
     "features": {
@@ -11,36 +11,52 @@
         "ghcr.io/wyrd-company/devcontainers/codex-cli:1": {},
         "ghcr.io/wyrd-company/devcontainers/cursor-agent-cli:1": {},
         "ghcr.io/wyrd-company/devcontainers/dagu:latest": {
-            "dnsName": "workflows.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+            "dnsName": "workflows.{{ slug }}.{{ domain_name }}"
         },
-        {{ if (eq .Scaffold.docker "docker-in-docker") }}"ghcr.io/wyrd-company/devcontainers/docker-in-docker:1": {},{{ end }}
-        {{ if (eq .Scaffold.docker "docker-out-of-docker") }}"ghcr.io/wyrd-company/devcontainers/docker-outside-of-docker:1": {},{{ end }}
-        {{ if (.Scaffold.sdks | has "dotnet") }}"ghcr.io/devcontainers/features/dotnet:2": {},{{ end }}
+        {%- if 'bun' in sdks %}
+        "ghcr.io/rails/devcontainer/features/bun": {},
+        {%- endif %}
+        {%- if docker == 'docker-in-docker' %}
+        "ghcr.io/wyrd-company/devcontainers/docker-in-docker:1": {},
+        {%- elif docker == 'docker-outside-of-docker' %}
+        "ghcr.io/wyrd-company/devcontainers/docker-outside-of-docker:1": {},
+        {%- endif %}
+        {%- if 'dotnet' in sdks %}
+        "ghcr.io/devcontainers/features/dotnet:2": {},
+        {%- endif %}
         "ghcr.io/meaningful-ooo/devcontainer-features/fish:2": {},
-        {{ if (.Scaffold.sdks | has "flutter") }}"ghcr.io/wyrd-company/the-wyrding-way-design-system/flutter:1": {},{{ end }}
-        {{ if (.Scaffold.sdks | has "go") }}"ghcr.io/wyrd-company/devcontainers/go:1": {},{{ end }}
+        {%- if 'flutter' in sdks %}
+        "ghcr.io/wyrd-company/the-wyrding-way-design-system/flutter:1": {},
+        {%- endif %}
+        {%- if 'go' in sdks %}
+        "ghcr.io/wyrd-company/devcontainers/go:1": {},
+        {%- endif %}
         "ghcr.io/wyrd-company/heddle/heddle:1": {
-            "dnsName": "heddle.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+            "dnsName": "heddle.{{ slug }}.{{ domain_name }}"
         },
         "ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2": {},
         "ghcr.io/devcontainers/features/node:2": {},
         "ghcr.io/wyrd-company/devcontainers/openbao-agent:1": {},
-        "ghcr.io/wyrd-company/devcontainers/opencodex:2": {}
+        "ghcr.io/wyrd-company/devcontainers/opencodex:2": {},
         "ghcr.io/wyrd-company/devcontainers/opentelemetry-collector:1": {
             "distribution": "contrib"
-        }
+        },
         "ghcr.io/wyrd-company/devcontainers/pi-coding-agent:1": {},
+        {%- if 'python' in sdks %}
         "ghcr.io/devcontainers/features/python:1": {},
-        {{ if (.Scaffold.sdks | has "rust") }}"ghcr.io/devcontainers/features/rust:1": {},{{ end }}
-        "ghcr.io/wyrd-company/devcontainers/sshd:1": {},        
+        {%- endif %}
+        {%- if 'rust' in sdks %}
+        "ghcr.io/devcontainers/features/rust:1": {},
+        {%- endif %}
+        "ghcr.io/wyrd-company/devcontainers/sshd:1": {},
         "ghcr.io/wyrd-company/devcontainers/t3code-server:latest": {
             "packageSource": "github:wyrd-company/t3code",
-            "dnsName": "t3.{{ .ProjectKebab }}.{{ .Scaffold.domain_name }}"
+            "dnsName": "t3.{{ slug }}.{{ domain_name }}"
         }
     },
 
-    "workspaceMount": "source=${localWorkspaceFolder}/{{ .ProjectKebab }},target=/workspaces/{{ .ProjectKebab }},type=bind,consistency=cached",
-    "workspaceFolder": "/workspaces/{{ .ProjectKebab }}",
+    "workspaceMount": "source=${localWorkspaceFolder}/{{ slug }},target=/workspaces/{{ slug }},type=bind,consistency=cached",
+    "workspaceFolder": "/workspaces/{{ slug }}",
 
     "mounts": [
         {   // AGENTS.md
@@ -88,11 +104,13 @@
             "target": "/home/vscode/.cursor",
             "type": "bind"
         },
-        {{- if .Scaffold.docker }}        {   // Docker workspaces mnt folder - shared by host so docker bind mounts work
-            "source": "/workspaces/mnt/{{ .ProjectKebab }}",
-            "target": "/workspaces/mnt/{{ .ProjectKebab }}",
+        {%- if uses_docker %}
+        {   // Docker workspaces mnt folder - shared by host so docker bind mounts work
+            "source": "/workspaces/mnt/{{ slug }}",
+            "target": "/workspaces/mnt/{{ slug }}",
             "type": "bind"
-        },{{ end }}
+        },
+        {%- endif %}
         {
             "source": "${localEnv:HOME}/.workspaces/dagu",
             "target": "/home/vscode/.config/dagu",
@@ -149,7 +167,7 @@
             "type": "bind"
         },
         {   // mnemonic user vault
-            "source": "${localEnv:$HOME}/mnemonic-vault",
+            "source": "${localEnv:HOME}/mnemonic-vault",
             "target": "/home/vscode/mnemonic-vault",
             "type": "bind"
         },
@@ -169,8 +187,8 @@
             "type": "bind"
         },
         {   // VS Code workspace file
-            "source": "${localWorkspaceFolder}/{{ .ProjectKebab }}.code-workspace",
-            "target": "/workspaces/{{ .ProjectKebab }}.code-workspace",
+            "source": "${localWorkspaceFolder}/{{ slug }}.code-workspace",
+            "target": "/workspaces/{{ slug }}.code-workspace",
             "type": "bind"
         },
         {   // Wyrwood ssh-agent socket
@@ -183,12 +201,18 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                {{- if .Scaffold.docker }}                // Docker and containers
-                "ms-azuretools.vscode-docker",{{ end }}
-                {{- if .Scaffold.sdks | has "go" }}                // Go
-                "golang.Go",{{ end }}
-                {{- if (.Scaffold.sdks | has "node" or .Scaffold.sdks | has "bun") }}                // Typescript
-                "ms-vscode.vscode-typescript-next",{{ end }}
+                {%- if uses_docker %}
+                // Docker and containers
+                "ms-azuretools.vscode-docker",
+                {%- endif %}
+                {%- if 'go' in sdks %}
+                // Go
+                "golang.Go",
+                {%- endif %}
+                {%- if 'node' in sdks or 'bun' in sdks %}
+                // Typescript
+                "ms-vscode.vscode-typescript-next",
+                {%- endif %}
 
                 // AI Assistants
                 "anthropic.claude-code",              // Claude
@@ -204,7 +228,7 @@
                 "task.vscode-task"
             ],
             "settings": {
-                "window.title": "{{ .Project | toUpper }}"
+                "window.title": "{{ name | upper }}",
                 "terminal.integrated.shell.linux": "/bin/fish",
                 "markdown.preview.theme": "github",
                 "claudeCode": {
@@ -228,7 +252,7 @@
                     }
                 },
                 "todo-tree.ripgrep.ripgrep": "/home/linuxbrew/.linuxbrew/bin/rg",
-                "remote.SSH.enableAgentForwarding": {{ .Scaffold.enable_agent_forwarding }}
+                "remote.SSH.enableAgentForwarding": {{ 'true' if enable_agent_forwarding else 'false' }}
             }
         }
     },
@@ -239,7 +263,7 @@
         "NODE_EXTRA_CA_CERTS": "/usr/local/share/ca-certificates/",
         "NPM_CONFIG_PREFIX": "/home/vscode/.npm-global",
         "PNPM_HOME": "/home/vscode/.npm-global/bin",
-        "PROJECT": "{{ .Project }}",
+        "PROJECT": "{{ name }}",
         "SSH_AUTH_SOCK": "/home/vscode/.ssh-agent.sock",
         "WORKSPACE_HOME": "${containerWorkspaceFolder}",
     },
@@ -254,7 +278,7 @@
     "runArgs": [
         "--network=devcontainers",
         "-l", "devcontainer.id=${devcontainerId}",
-        "-h", "{{ .ProjectKebab }}",
-        "--name", "{{ .ProjectKebab }}"
+        "-h", "{{ slug }}",
+        "--name", "{{ slug }}"
     ]
 }

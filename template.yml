@@ -1,0 +1,73 @@
+name: workspace
+description: A devcontainer workspace with agent, workflow, and memory folders
+
+data: !include data/workspace.yml
+
+interview:
+  - id: slug
+    type: text
+    prompt: Workspace slug
+    description: Identifies the workspace in folder names, host names, and branches.
+    placeholder: my-project
+    required: true
+    validate:
+      regex: '^[a-z0-9]+(-[a-z0-9]+)*$'
+
+  - id: name
+    type: text
+    prompt: Workspace name
+    default: "{{ slug | title }}"
+    required: true
+
+  - id: domain_name
+    type: text
+    prompt: Host domain name
+    description: Services in the container are reached at <service>.{{ slug }}.<domain>.
+    placeholder: example.test
+    required: true
+
+  - id: sdks
+    type: multiselect
+    prompt: SDKs
+    description: Node is always installed.
+    options: [ bun, dotnet, flutter, go, node, python, rust ]
+    default: []
+
+  - id: docker
+    type: select
+    prompt: Docker support
+    description: >-
+      Docker-in-Docker runs a daemon inside the container. Docker-outside-of-Docker
+      uses the host daemon. Both bind mount /workspaces/mnt/{{ slug }}.
+    options: [ none, docker-in-docker, docker-outside-of-docker ]
+    default: none
+
+  - id: uses_docker
+    computed: "docker != 'none'"
+
+  - id: enable_agent_forwarding
+    type: confirm
+    prompt: Enable SSH agent forwarding for remote connections?
+    default: false
+
+files:
+  - each: folders as folder
+    source: parts/gitkeep
+    path: "{{ folder }}/.gitkeep"
+
+hooks:
+  - script: hooks/clone-or-create
+    args: [ "{{ repos.kanban.url }}", "{{ slug }}", "{{ repos.kanban.path }}" ]
+  - script: hooks/clone-or-create
+    args: [ "{{ repos.memory.url }}", "{{ slug }}", "{{ repos.memory.path }}" ]
+  - script: hooks/clone-or-create
+    args: [ "{{ repos.workflows.url }}", "{{ slug }}", "{{ repos.workflows.path }}" ]
+
+messages:
+  before-apply: |
+    Creating workspace {{ name }} ({{ slug }}).
+    The hooks clone branch `{{ slug }}` of the kanban, memory, and workflows
+    repositories, and create and push the branch when it does not exist.
+  after-apply: |
+    Workspace {{ name }} is ready. Open the folder in VS Code and reopen it in
+    the container.

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Usage: clone-or-create <remote-url> <branch> <destination>
+#
 # Clone <branch> from <remote-url> into <destination>, or create it as an
 # orphan branch (with an empty initial commit) and push it if it doesn't exist.
 clone_or_create() {
@@ -39,6 +41,4 @@ clone_or_create() {
     fi
 }
 
-clone_or_create git@github.com:boblangley/kanban.git          "{{ .ProjectKebab }}" kanban
-clone_or_create git@github.com:boblangley/mnemonic-vault.git  "{{ .ProjectKebab }}" memory
-clone_or_create git@github.com:boblangley/workflows.git       "{{ .ProjectKebab }}" workflows/local
+clone_or_create "$@"
